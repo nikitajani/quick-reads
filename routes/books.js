@@ -1,25 +1,57 @@
 import express from "express";
 
-const booksRouter = express.Router();
+import bookServiceFactory from "../service/bookService.js";
 
-booksRouter.get("/", function (req, res) {
-  res.send(`${req.originalUrl}`);
-});
+function booksRouterFactory(deps) {
+  const bookService = bookServiceFactory(deps);
 
-booksRouter.post("/", function (req, res) {
-  res.send(`${req.originalUrl}`);
-});
+  const booksRouter = express.Router();
 
-booksRouter.put("/:id", function (req, res) {
-  res.send(`${req.originalUrl}`);
-});
+  booksRouter.get("/", async function (req, res) {
+    const books = await bookService.getBooks();
 
-booksRouter.get("/:id", function (req, res) {
-  res.send(`${req.originalUrl}`);
-});
+    if (!books || !books.length) {
+      res.status(200).json({
+        body: {
+          booksCount: 0,
+          books: [],
+        },
+      });
+      return;
+    }
 
-booksRouter.delete("/:id", function (req, res) {
-  res.send(`${req.originalUrl}`);
-});
+    res.json({
+      body: {
+        books,
+        booksCount: books.length,
+      },
+    });
+  });
 
-export default booksRouter;
+  booksRouter.post("/", async function (req, res) {
+    const book = await bookService.postBook(req.body);
+
+    res.status(200).send(book);
+  });
+
+  booksRouter.put("/:id", async function (req, res) {
+    const book = await bookService.updateBook(req.params.id, req.body);
+
+    res.send(book);
+  });
+
+  booksRouter.get("/:id", async function (req, res) {
+    const book = await bookService.getBooksById(req.params.id);
+
+    res.status(200).send(book);
+  });
+
+  booksRouter.delete("/:id", async function (req, res) {
+    const book = await bookService.deleteBook(req.params.id);
+    res.send(book);
+  });
+
+  return booksRouter;
+}
+
+export default booksRouterFactory;
