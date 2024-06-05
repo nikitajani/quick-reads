@@ -3,6 +3,9 @@ import express from "express";
 const remarksRouter = express.Router();
 
 remarksRouter.get("/", function (req, res) {
+  // TODO
+  // Implement this route
+
   res.send(`${req.originalUrl}`);
 });
 
